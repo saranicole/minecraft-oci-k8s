@@ -1,11 +1,9 @@
 terraform {
 
-  # this requires tf >=1.12
-  # see previous versions of this file for backwards compatibilyt
   backend "oci" {
-    namespace = "frrwy4uskhkj"
+    namespace = "axiyuxi1vimf"
     bucket    = "terraform-states"
-    key       = "infra/terraform.tfstate"
+    key       = "infra/cluster.tfstate"
   }
 
   required_providers {

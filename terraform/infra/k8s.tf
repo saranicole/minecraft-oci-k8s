@@ -46,6 +46,19 @@ data "jq_query" "latest_image" {
   query = "[.sources[] | select(.source_name | test(\".*aarch.*OKE-${replace(var.kubernetes_version, "v", "")}.*\")?) .image_id][0]"
 }
 
+resource "oci_identity_tag_namespace" "k8s_node_pool" {
+  compartment_id = var.compartment_id
+  description    = "Tags for k8s node pool"
+  name           = "k8s-node-pool"
+}
+
+resource "oci_identity_tag" "role" {
+  description      = "Role tag for k8s node pool"
+  name             = "role"
+  tag_namespace_id = oci_identity_tag_namespace.k8s_node_pool.id
+}
+
+
 resource "oci_containerengine_node_pool" "k8s_node_pool" {
   cluster_id         = oci_containerengine_cluster.k8s_cluster.id
   compartment_id     = var.compartment_id
@@ -60,6 +73,9 @@ resource "oci_containerengine_node_pool" "k8s_node_pool" {
     placement_configs {
       availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
       subnet_id           = oci_core_subnet.vcn_private_subnet.id
+    }
+    defined_tags = {
+      "k8s-node-pool.role" = "worker"
     }
 
     placement_configs {
@@ -93,3 +109,20 @@ resource "oci_containerengine_node_pool" "k8s_node_pool" {
   }
   ssh_public_key = var.ssh_public_key
 }
+
+resource "oci_identity_dynamic_group" "k8s_nodes" {
+  compartment_id = var.compartment_id  # Dynamic groups must be created at tenancy level
+  name           = "k8s-nodes"
+  description    = "Dynamic group for OKE worker nodes"
+  matching_rule  = "tag.k8s-node-pool.role.value = 'worker'"
+}
+
+resource "oci_identity_policy" "k8s_nodes_object_storage" {
+  compartment_id = var.compartment_id
+  name           = "k8s-nodes-object-storage"
+  description    = "Allow k8s nodes to access Object Storage"
+  statements = [
+    "Allow dynamic-group k8s-nodes to manage objects in compartment id ${var.compartment_id} where target.bucket.name = 'minecraft-backups'",
+  ]
+}
+

@@ -1,0 +1,69 @@
+image:
+  repository: docker.io/itzg/minecraft-server
+  tag: java21
+  pullPolicy: IfNotPresent
+  pullSecret: ""
+
+
+resources:
+  requests:
+    memory: 8Gi
+    cpu: 1
+    
+workloadAsStatefulSet: true
+
+strategyType: RollingUpdate
+
+minecraftServer:
+  # This must be overridden, since we can't accept this for the user.
+  eula: "TRUE"
+  # One of: LATEST, SNAPSHOT, or a specific version (ie: "1.7.9").
+  version: "1.21.1"
+  ## The type of Minecraft server to run, check for related settings below
+  ## Common types: "VANILLA", "FABRIC", "FORGE", "SPIGOT", "BUKKIT", "PAPER",
+  ## "FTBA", "SPONGEVANILLA", "AUTO_CURSEFORGE"
+  ## ref: https://docker-minecraft-server.readthedocs.io/en/latest/types-and-platforms
+  type: "FABRIC"
+  fabricLoaderVersion: 0.18.6
+  difficulty: peaceful
+  whitelist: junipercraft,saranicole1980
+  ops: junipercraft,saranicole1980
+  motd: "Welcome to Juniper\'s Pokemon Minecraft on Kubernetes!"
+  modUrls:
+    - https://cdn.modrinth.com/data/MdwFAVRL/versions/Ygf8KJFC/Cobblemon-fabric-1.7.0%2B1.21.1.jar
+    - https://cdn.modrinth.com/data/P7dR8mSH/versions/yGAe1owa/fabric-api-0.116.9%2B1.21.1.jar
+  downloadWorldUrl: https://drive.usercontent.google.com/u/0/uc?id=1g98NavTgvHjeIY2tTjOWxEz5cSo3-90e&export=download
+  serviceType: LoadBalancer
+  
+envFrom: 
+- secretRef:
+    name: rcon-creds
+    
+  rcon:
+    # If you enable this, make SURE to change your password below.
+    enabled: true
+    withGeneratedPassword: false
+    existingSecret: rcon-creds
+    secretKey: RCON_PASSWORD
+    
+persistence:
+  labels: {}
+  annotations: {}
+  dataDir:
+    enabled: true
+    Size: 1Gi
+    accessModes:
+      - ReadWriteOnce
+  
+mcbackup:
+  image:
+    repository: docker.io/itzg/mc-backup
+    tag: latest
+    pullPolicy: IfNotPresent
+  enabled: true
+  backupMethod: rclone
+  backupInterval: "30m"
+  pruneBackupsDays: 3
+  pauseIfNoPlayers: true
+  rcloneDestination: "oci:minecraft-backups/worlds"
+  rcloneConfigExistingSecret: rclone-config

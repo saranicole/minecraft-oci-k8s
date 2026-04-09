@@ -35,6 +35,9 @@ minecraftServer:
   downloadWorldUrl: https://drive.usercontent.google.com/u/0/uc?id=1g98NavTgvHjeIY2tTjOWxEz5cSo3-90e&export=download
   serviceType: LoadBalancer
   
+serviceAnnotations:
+  oci.oraclecloud.com/load-balancer-type: "nlb"
+  
 envFrom: 
 - secretRef:
     name: rcon-creds

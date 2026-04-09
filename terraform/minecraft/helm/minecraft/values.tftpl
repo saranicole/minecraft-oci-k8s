@@ -15,6 +15,12 @@ workloadAsStatefulSet: true
 strategyType: RollingUpdate
 
 minecraftServer:
+  rcon:
+    # If you enable this, make SURE to change your password below.
+    enabled: true
+    withGeneratedPassword: false
+    existingSecret: rcon-creds
+    secretKey: RCON_PASSWORD
   # This must be overridden, since we can't accept this for the user.
   eula: "TRUE"
   # One of: LATEST, SNAPSHOT, or a specific version (ie: "1.7.9").
@@ -34,20 +40,20 @@ minecraftServer:
     - https://cdn.modrinth.com/data/P7dR8mSH/versions/yGAe1owa/fabric-api-0.116.9%2B1.21.1.jar
   downloadWorldUrl: https://drive.usercontent.google.com/u/0/uc?id=1g98NavTgvHjeIY2tTjOWxEz5cSo3-90e&export=download
   serviceType: LoadBalancer
+  overrideServerProperties: true
   
 serviceAnnotations:
   oci.oraclecloud.com/load-balancer-type: "nlb"
   
+extraEnv:
+  # recommended rolling logs for saving disk
+  ENABLE_ROLLING_LOGS: true
+  ENABLE_WHITELIST: true
+  ENFORCE_WHITELIST: true
+  
 envFrom: 
 - secretRef:
     name: rcon-creds
-    
-  rcon:
-    # If you enable this, make SURE to change your password below.
-    enabled: true
-    withGeneratedPassword: false
-    existingSecret: rcon-creds
-    secretKey: RCON_PASSWORD
     
 persistence:
   labels: {}
@@ -68,5 +74,6 @@ mcbackup:
   backupInterval: "30m"
   pruneBackupsDays: 3
   pauseIfNoPlayers: true
-  rcloneDestination: "oci:minecraft-backups/worlds"
-  rcloneConfigExistingSecret: rclone-config
+  rcloneRemote: "remote"
+  rcloneDestDir: "minecraft-backups/worlds"
+  rcloneConfigExistingSecret: rclone-secret

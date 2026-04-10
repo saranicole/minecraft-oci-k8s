@@ -16,8 +16,29 @@ resource "oci_core_subnet" "vcn_public_subnet" {
   vcn_id            = module.vcn.vcn_id
   cidr_block        = "10.0.0.0/24"
   route_table_id    = module.vcn.ig_route_id
-  security_list_ids = [oci_core_security_list.public_subnet_sl.id]
+  security_list_ids = [
+    oci_core_security_list.public_subnet_sl.id,
+    oci_core_security_list.public_security_list.id
+  ]
   display_name      = "k8s-public-subnet"
+}
+
+
+resource "oci_core_security_list" "public_security_list" {
+  compartment_id = var.compartment_id
+  vcn_id         = module.vcn.vcn_id
+  display_name   = "minecraft-security-list"
+
+  ingress_security_rules {
+    protocol  = "6"         # TCP
+    source    = "0.0.0.0/0"
+    stateless = false
+
+    tcp_options {
+      min = 25565
+      max = 25565
+    }
+  }
 }
 
 resource "oci_core_security_list" "private_subnet_sl" {

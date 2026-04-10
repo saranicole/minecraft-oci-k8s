@@ -58,23 +58,6 @@ resource "oci_identity_tag" "role" {
   tag_namespace_id = oci_identity_tag_namespace.k8s_node_pool.id
 }
 
-resource "oci_core_security_list" "public_security_list" {
-  compartment_id = var.compartment_id
-  vcn_id         = module.vcn.vcn_id
-  display_name   = "minecraft-security-list"
-
-  ingress_security_rules {
-    protocol  = "6"         # TCP
-    source    = "0.0.0.0/0"
-    stateless = false
-
-    tcp_options {
-      min = 25565
-      max = 25565
-    }
-  }
-}
-
 resource "oci_containerengine_node_pool" "k8s_node_pool" {
   cluster_id         = oci_containerengine_cluster.k8s_cluster.id
   compartment_id     = var.compartment_id

@@ -1,10 +1,6 @@
 terraform {
 
-  backend "oci" {
-    namespace = "axiyuxi1vimf"
-    bucket    = "terraform-states"
-    key       = "infra/minecraft.tfstate"
-  }
+  backend "oci" {}
 
   required_providers {
     oci = {

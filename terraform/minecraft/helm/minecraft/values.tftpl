@@ -22,28 +22,29 @@ minecraftServer:
     existingSecret: rcon-creds
     secretKey: RCON_PASSWORD
   # This must be overridden, since we can't accept this for the user.
-  eula: "TRUE"
+  eula: "${accept_eula}"
   # One of: LATEST, SNAPSHOT, or a specific version (ie: "1.7.9").
-  version: "1.21.1"
+  version: "${world_version}"
   ## The type of Minecraft server to run, check for related settings below
   ## Common types: "VANILLA", "FABRIC", "FORGE", "SPIGOT", "BUKKIT", "PAPER",
   ## "FTBA", "SPONGEVANILLA", "AUTO_CURSEFORGE"
   ## ref: https://docker-minecraft-server.readthedocs.io/en/latest/types-and-platforms
-  type: "FABRIC"
-  fabricLoaderVersion: 0.18.6
-  difficulty: peaceful
-  whitelist: junipercraft,saranicole1980
-  ops: junipercraft,saranicole1980
-  motd: "Welcome to Juniper\'s Pokemon Minecraft on Kubernetes!"
+  type: "${server_type}"
+  fabricLoaderVersion: ${fabric_loader_version}
+  difficulty: ${difficulty}
+  whitelist: ${whitelist}
+  ops: ${ops}
+  motd: ${motd}
   modUrls:
-    - https://cdn.modrinth.com/data/MdwFAVRL/versions/Ygf8KJFC/Cobblemon-fabric-1.7.0%2B1.21.1.jar
-    - https://cdn.modrinth.com/data/P7dR8mSH/versions/yGAe1owa/fabric-api-0.116.9%2B1.21.1.jar
-  downloadWorldUrl: https://drive.usercontent.google.com/u/0/uc?id=1g98NavTgvHjeIY2tTjOWxEz5cSo3-90e&export=download
+    ${ mod_urls }
+  downloadWorldUrl: ${download_world_url}
   serviceType: LoadBalancer
   overrideServerProperties: true
-  
+ 
+%{ if enable_oci_load_balancer }
 serviceAnnotations:
   oci.oraclecloud.com/load-balancer-type: "nlb"
+%{ endif }
   
 extraEnv:
   # recommended rolling logs for saving disk
@@ -75,5 +76,5 @@ mcbackup:
   pruneBackupsDays: 3
   pauseIfNoPlayers: true
   rcloneRemote: "remote"
-  rcloneDestDir: "minecraft-backups/worlds"
+  rcloneDestDir: "${rclone_dest_dir}"
   rcloneConfigExistingSecret: rclone-secret

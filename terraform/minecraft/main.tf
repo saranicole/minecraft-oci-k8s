@@ -13,7 +13,7 @@ resource "helm_release" "minecraft" {
     whitelist                 = var.whitelist,
     ops                       = var.ops,
     motd                      = var.motd,
-    mod_urls                  = yamlencode(var.mod_urls),
+    mod_urls                  = indent(4, yamlencode(var.mod_urls)),
     download_world_url        = var.download_world_url,
     rclone_dest_dir           = var.rclone_dest_dir,
     enable_oci_backup_bucket  = var.enable_oci_backup_bucket,
@@ -44,10 +44,20 @@ resource "kubernetes_secret_v1" "rclone-config" {
     name = "rclone-config"
   }
   data = {
-    rclone.conf = templatefile("${path.module}/rclone.conf.tftpl", {
+    "rclone.conf" = templatefile("${path.module}/rclone.conf.tftpl", {
       bucket_namespace = var.bucket_namespace
       compartment_id = var.compartment_id
       region = var.region
     })
   }
+}
+
+data "kubernetes_service_v1" "lb" {
+  metadata {
+    name = "minecraft"
+  }
+}
+
+output my_minecraft_server_ip {
+  value = data.kubernetes_service_v1.lb.status[0].load_balancer[0].ingress[0].ip
 }

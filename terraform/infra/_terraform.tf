@@ -1,10 +1,6 @@
 terraform {
 
-  backend "oci" {
-    namespace = "axiyuxi1vimf"
-    bucket    = "terraform-states"
-    key       = "infra/cluster.tfstate"
-  }
+  backend "oci" {}
 
   required_providers {
     jq = {

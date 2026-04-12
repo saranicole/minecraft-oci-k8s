@@ -45,6 +45,19 @@ minecraftServer:
 serviceAnnotations:
   oci.oraclecloud.com/load-balancer-type: "nlb"
 %{ endif }
+
+%{ if enable_custom_cobblemon }
+extraVolumes:
+  - volumeMounts:
+    - name: cobblemon-main
+      mountPath: /data/config/cobblemon/main.json
+      subPath: main.json
+      readOnly: true
+    volumes:
+      - name: cobblemon-main
+        configMap:
+          name: cobblemon-main
+%{ endif }
   
 extraEnv:
   # recommended rolling logs for saving disk

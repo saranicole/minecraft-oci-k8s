@@ -144,3 +144,9 @@ variable "rcon_password" {
   type = string
   default = null
 }
+
+variable "enable_custom_cobblemon" {
+  description = "Set to true to enable cobblemon-specific configuration tweaks"
+  type = bool
+  default = false
+}

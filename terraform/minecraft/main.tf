@@ -18,6 +18,7 @@ resource "helm_release" "minecraft" {
     rclone_dest_dir           = var.rclone_dest_dir,
     enable_oci_backup_bucket  = var.enable_oci_backup_bucket,
     enable_oci_load_balancer  = var.enable_oci_load_balancer,
+    enable_custom_cobblemon   = var.enable_custom_cobblemon,
   })]
 }
 
@@ -44,12 +45,23 @@ resource "kubernetes_secret_v1" "rclone-config" {
     name = "rclone-config"
   }
   data = {
-    "rclone.conf" = templatefile("${path.module}/rclone.conf.tftpl", {
+    "rclone.conf" = templatefile("${path.module}/templates/rclone.conf.tftpl", {
       bucket_namespace = var.bucket_namespace
       compartment_id = var.compartment_id
       region = var.region
     })
   }
+}
+
+resource "kubernetes_config_map_v1" "cobblemon_main" {
+  count = var.enable_custom_cobblemon ? 1 : 0
+  metadata {
+    name = "cobblemon-main"
+  }
+  data = {
+    "main.json" = templatefile("${path.module}/templates/main.json.tftpl", {} ) 
+  }
+
 }
 
 data "kubernetes_service_v1" "lb" {

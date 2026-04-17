@@ -1,3 +1,7 @@
+# Docs
+
+See [https://sarajarjoura.com/how-to-play-pokemon-in-vr-minecraft](https://sarajarjoura.com/how-to-play-pokemon-in-vr-minecraft/) for the blog post that explains what this is all about!
+
 # ⎈ Oracle Cloud Kubernetes free tier setup
 
 This repository leverages Oracle Cloud's [always free tier][oci-free-tier] to provision a kubernetes cluster.
